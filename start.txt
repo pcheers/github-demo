@@ -10,3 +10,5 @@ This is Raja Bhai
 /subsystem=security/elytron-realm=example-realm:add(legacy-jaas-config=example-security-domain)
 
 /subsystem=elytron/security-domain=example-security-domain:add(realms=[{realm=example-realm}], default-realm=example-realm, permission-mapper=default-permission-mapper)
+
+https://github.com/pepgrifell/ElytronCustomRealm/blob/main/CustomSecurityRealm/src/main/java/com/grifell/pep/security/realm/CustomSecurityRealm.java
