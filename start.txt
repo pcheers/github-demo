@@ -12,3 +12,8 @@ This is Raja Bhai
 /subsystem=elytron/security-domain=example-security-domain:add(realms=[{realm=example-realm}], default-realm=example-realm, permission-mapper=default-permission-mapper)
 
 https://github.com/pepgrifell/ElytronCustomRealm/blob/main/CustomSecurityRealm/src/main/java/com/grifell/pep/security/realm/CustomSecurityRealm.java
+
+
+https://darranl.blogspot.com/2018/02/wildfly-elytron-implementing-custom.html
+
+https://github.com/wildfly-security-incubator/elytron-examples/blob/main/simple-http-mechanism/src/main/java/org/wildfly/security/examples/CustomHeaderHttpAuthenticationMechanism.java
