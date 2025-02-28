@@ -1,0 +1,77 @@
+import org.wildfly.security.auth.server.*;
+import org.wildfly.security.auth.SupportLevel;
+import org.wildfly.security.authz.Attributes;
+import org.wildfly.security.password.interfaces.ClearPassword;
+import org.wildfly.security.password.spec.ClearPasswordSpec;
+import org.wildfly.security.password.Password;
+import org.wildfly.security.password.PasswordFactory;
+
+import java.security.Principal;
+import java.security.Provider;
+import java.security.Security;
+import java.util.Collections;
+
+public class DynamicUserSecurityRealm implements SecurityRealm {
+
+    @Override
+    public RealmIdentity getRealmIdentity(RealmIdentity.PrincipalLookup principalLookup) {
+        return new RealmIdentity() {
+            @Override
+            public Principal getPrincipal() {
+                return principalLookup.getPrincipal();
+            }
+
+            @Override
+            public SupportLevel getCredentialAcquireSupport(Class<? extends Credential> credentialType, String algorithmName, AlgorithmParameterSpec parameterSpec) {
+                return credentialType == PasswordCredential.class ? SupportLevel.SUPPORTED : SupportLevel.UNSUPPORTED;
+            }
+
+            @Override
+            public Credential getCredential(Class<? extends Credential> credentialType, String algorithmName, AlgorithmParameterSpec parameterSpec) {
+                if (credentialType == PasswordCredential.class) {
+                    try {
+                        PasswordFactory factory = PasswordFactory.getInstance(ClearPassword.ALGORITHM_CLEAR);
+                        Password password = factory.generatePassword(new ClearPasswordSpec("dynamicUserPassword".toCharArray()));
+                        return new PasswordCredential(password);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public Attributes getAttributes() {
+                return Attributes.EMPTY;
+            }
+
+            @Override
+            public boolean exists() {
+                return true; // Allows any user who provides valid credentials
+            }
+        };
+    }
+
+    @Override
+    public RealmIdentity getRealmIdentity(Principal principal) {
+        return getRealmIdentity(RealmIdentity.PrincipalLookup.from(principal));
+    }
+
+    @Override
+    public SupportLevel getCredentialAcquireSupport(Class<? extends Credential> credentialType, String algorithmName, AlgorithmParameterSpec parameterSpec) {
+        return credentialType == PasswordCredential.class ? SupportLevel.SUPPORTED : SupportLevel.UNSUPPORTED;
+    }
+
+    @Override
+    public SupportLevel getEvidenceVerifySupport(Class<? extends Evidence> evidenceType, String algorithmName) {
+        return evidenceType == PasswordGuessEvidence.class ? SupportLevel.SUPPORTED : SupportLevel.UNSUPPORTED;
+    }
+
+    @Override
+    public boolean verifyEvidence(RealmIdentity identity, Evidence evidence) {
+        if (evidence instanceof PasswordGuessEvidence) {
+            return ((PasswordGuessEvidence) evidence).verify("dynamicUserPassword".toCharArray());
+        }
+        return false;
+    }
+}
